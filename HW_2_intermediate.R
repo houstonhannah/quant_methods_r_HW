@@ -6,7 +6,9 @@
 #' ---
 #' 
 
-#Examine the following for loop, and then complete the exercises
+#'Examine the following for loop, and then complete the exercises
+#'---
+#'
 
 data(iris) #calls in the data set
 head(iris)
@@ -49,11 +51,21 @@ output
 #'2. Describe using pseudo-code how `output` was calculated.
 #'---
 #' 
-#for example: Loop from 1 to length of species identities
-#Take a subset of iris data 
-#Loop from 1 to number of columns of the iris data
-#If ... occurs then do ...  
-#need to pull this from your notes 
+#Call in data and remove duplicate elements/rows, left with only setosa, versicolor, and virginica
+#output creates a table that will be filled in later (uses 0's, in the future use NA)
+#making a matrix with 3 rows (same as num of species) and 4 columns (5 columns in dataset iris, subtract one from that)
+#species id's will be the rownames 
+#column names will be the same as in iris data set just minus the species column
+
+#loop from 1 to length of species identities 
+#subsets data to specific species, excludes the "species" column
+#loop from 1 to the number of columns (traits) of iris species 
+#defines y and x as 0 to be filled with data later 
+    #if the row of iris species is greater than 0
+        #for each element in iris species loop from 1 to number of rows
+        #x becomes the sum of each column (traits), x resets to 0 for each new trait
+        #y becomes the number of rows + 1 
+     #output is the average of each trait for each species 
 
 
 #'3. The variables in the loop were named so as to be vague. How can the objects`output`, `x`, and `y` be renamed such that it is clearer what is occurring in the loop.
@@ -125,31 +137,31 @@ x <- (1:10)
 y <- NULL
 for (i in 1:length(x)) {
   y[i] <- sum(x[1]:x[i], na.rm = TRUE)
-  if(y[i] > 10) {
-    print(NA)
-        }
-    }
+  if (y[i] > 10) {
+    y[i] <- NA
+  }
+}
 y
 
-x <- (1:10)
-y <- NULL
-for (i in 1:length(x)) {
-  y[i] <- sum(x[1]:x[i], na.rm = TRUE)
-  if (y[i] > 10) {
-    print('NA')
-  }
-  else {
-    if (y[i] <= 10) 
-      print('ok')
-  
-  }
-  }
 
-#if else works, just the if does not work
 
-#7. Place your for loop into a function that accepts as its argument any vector of arbitrary length and it will return `y`. 
-#---
+#'7. Place your for loop into a function that accepts as its argument any vector of arbitrary length and it will return `y`. 
+#'---
+#'
 
+calc_cumsum <- function(x) { 
+  y <- NULL
+  for (i in 1:length(x)) {
+    y[i] <- sum(x[1]:x[i], na.rm = TRUE)
+    if ((y[i] > 10)) {
+      y[i] <- NA
+    }
+  }
+  y
+}
+
+calc_cumsum(1:20)
+calc_cumsum(c(1, 3, 4, 5))
 
 #' **(Optional)Fibonacci numbers and Golden ratio**
 #' ---
@@ -159,10 +171,22 @@ for (i in 1:length(x)) {
 #'0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, ...
 
 #Write and apply a simple R function that can accomplish this task with a for loop. 
+
+n <- 15 #number of terms it will print
+fib <- numeric(n)
+fib[1] <- 0
+fib[2] <- 1
+
+for (i in 3:n)
+  {
+    fib[i] <- fib[i-1]+fib[i-2] 
+  }
+print(fib)
+
+
+
 #Then write a function that computes the ratio of each sequential pair of 
 #Fibonacci numbers. Do they asympoticly approch the golden ratio (1 + sqrt(5)) / 2) ? 
-  
-  
   
   
   
