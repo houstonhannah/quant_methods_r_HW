@@ -1,78 +1,29 @@
 ---
-title: Univariate models
-layout: page
+title: "Univariate Models HW Assignment"
+author: "Hannah Houston and Ansley Williamson"
+date: "12 Feb 2023"
+output: html_document
 ---
 
 ## Univariate Assignment
 
 Read in tree data
 
-```r
+```{r}
 # read in directly from website: 
 trees <- read.csv('https://raw.githubusercontent.com/dmcglinn/quant_methods/gh-pages/data/treedata_subset.csv')
-# or download and import locally
-trees <- read.csv('./data/treedata_subset.csv')
 ```
+
 
 Examine this dataset and see how the data is structured, see function `str` 
 
-The contents of the metadata file ([`./data/tree_metadata.txt`](https://raw.githubusercontent.com/dmcglinn/quant_methods/gh-pages/data/tree_metadata.txt)) is provided below:
-
-
-The dataset includes tree abundances from a subset of a vegetation database of Great Smoky Mountains National Park (TN, NC).
-
-* plotID: unique code for each spatial unit (note some sampled more than once)
-* date: when species occurrence recorded
-* plotsize: size of quadrat in m2
-* spcode: unique 7-letter code for each species
-* species: species name
-* cover: local abundance measured as estimated horizontal cover (ie, relative area of shadow if sun is directly above) classes 1-10 are: 1=trace, 2=0-1%, 3=1-2%, 4=2-5%, 5=5-10%, 6=10-25%, 7=25-50%, 8=50-75%, 9=75-95%, 10=95-100%
-* utme: plot UTM Easting, zone 17 (NAD27 Datum)
-* utmn: plot UTM Northing, zone 17 (NAD27 Datum)
-* elev: elevation in meters from a digital elevation model (10 m res)
-* tci: topographic convergence index, or site "water potential"; measured as the upslope contributing area divided by the tangent of the slope angle (Beven and Kirkby 1979)
-* streamdist: distance of plot from the nearest permanent stream (meters)
-* disturb: plot disturbance history (from a Park report); CORPLOG=corporate logging; SETTLE=concentrated settlement, VIRGIN="high in virgin attributes", LT-SEL=light or selective logging
-* beers: transformed slope aspect ('heat load index'); 0 is SW (hottest), 2 is NE (coolest)
-
-![](../smokies_transects.png) 
-
-Above shows a map of the regional and local location of the elevational transects included in the dataset (from [Fridley 2009](http://plantecology.syr.edu/fridley/Fridley2009_jamc.pdf)).
-
-
-1\. Carry out an exploratory analysis using the tree dataset. Metadata for the
-tree study can be found [here](../data/tree_metadata.txt). Specifically, I would
-like you to develop and compare models for species cover for a habitat
-generalist [*Acer rubrum* (Red
-maple)](http://www.durhamtownship.com/blog-archives/pix/November1407.jpg) and a
-habitat specialist [*Abies fraseri* (Frasier
-fir)](https://upload.wikimedia.org/wikipedia/commons/d/d0/Abies_fraseri_Mitchell.jpg).
-Because this dataset includes both continuous and discrete explanatory variables
-use the function `Anova` in the packages `car` as such
-
-```r
-library(car)
-Anova(my_mod, type=3)
+```{r}
+str(trees)
 ```
 
-This will estimate partial effect sizes, variance explained, and p-values for 
-each explanatory variable included in the model. 
+Subset Data 
 
-Compare the p-values you observe using the function `Anova` to those generated
-using `summary`. 
-
-For each species address the following additional questions:
-
-* how well does the exploratory model appear to explain cover?
-* which explanatory variables are the most important?
-* do model diagnostics indicate any problems with violations of OLS assumptions?
-* are you able to explain variance in one species better than another, 
-  why might this be the case?
-
-Prior to addressing the above questions you will want to restructure and 
-subset the data using the following R code: 
-
-```r  
+```{r}
 # we wish to model species cover across all sampled plots
 # create site x sp matrix for two species 
 sp_cov = with(trees, tapply(cover, list(plotID, spcode), 
@@ -91,7 +42,130 @@ abies = site_dat[ , c('ABIEFRA', cols_to_select)]
 acer  = site_dat[ , c('ACERRUB', cols_to_select)]
 names(abies)[1] = 'cover'
 names(acer)[1] = 'cover'
+
 ```
+
+
+1\. Carry out an exploratory analysis using the tree dataset. Develop and compare models for species cover for a habitat generalist [*Acer rubrum* (Red maple)] and a habitat specialist [*Abies fraseri* (Frasier fir)] Because this dataset includes both continuous and discrete explanatory variables use the function `Anova` in the packages `car` as such
+```{r}
+#install.packages('car')
+library(car)
+#Anova(my_mod, type=3) will build models and use this later!
+```
+
+This will estimate partial effect sizes, variance explained, and p-values for 
+each explanatory variable included in the model. 
+
+Compare the p-values you observe using the function `Anova` to those generated
+using `summary`. 
+
+```{r}
+##Explore Red Maple (Acer rubrum)
+
+#make some graphs 
+#check out function pairs
+#top line is cover explained by the other variables, graphs below show correlation
+#can add smoothers and correlation coefficients to make these graphs more clear to guesstimate what variables should be in the model
+
+#run this chunk from pairs help 
+
+panel.cor <- function(x, y, digits = 2, prefix = "", cex.cor, ...)
+{
+    usr <- par("usr"); on.exit(par(usr))
+    par(usr = c(0, 1, 0, 1))
+    r <- abs(cor(x, y))
+    txt <- format(c(r, 0.123456789), digits = digits)[1]
+    txt <- paste0(prefix, txt)
+    if(missing(cex.cor)) cex.cor <- 0.8/strwidth(txt)
+    text(0.5, 0.5, txt, cex = cex.cor * r)
+}
+
+pairs(~ cover+elev+tci+streamdist+beers, data=acer, upper.panel = panel.smooth, lower.panel=panel.cor) #had to take out disturb for it to work
+#make model for cover and elevation (cor coef 0.39)
+#stream distance and elevation have a .34 correlation coef, but that makes sense b/c more streams at lower elevations
+
+pairs(~ cover+elev+tci+streamdist+beers, data=abies, upper.panel = panel.smooth, lower.panel=panel.cor) #had to take out disturb for it to work
+#build a model looking at elevation (cor coef 0.45), subset data to use only where fir is present, and streamdistance (cor coef 0.22)
+#stream distance and elevation have a .32 correlation coef, but that makes sense b/c more streams at lower elevations
+
+
+
+```
+
+```{r}
+
+#try to make a model for the trees
+
+#modeling for acer, looking at all variables 
+acer_mod_lm <- lm(cover ~ ., data=acer)
+Anova(acer_mod_lm, type=3) 
+summary(acer_mod_lm)
+#Anova and Summary generate same p-value
+
+#modeling for abies, looking at all variables 
+abies_mod_lm <- lm(cover~ ., data=abies)
+Anova(abies_mod_lm, type=3) 
+summary(abies_mod_lm)
+#Anova and Summary also generate same p-value
+
+
+#check normality 
+par(mfrow = c(2, 2))
+plot(acer_mod_lm) #check for normality, Q-Q looks good, points pretty much normally distributed
+plot(abies_mod_lm) #check for normality, Q-Q seems a little crazy, would look better if data was further subset-ed to use only points where abies (fir) were present
+
+#use predict function
+xrange = range(trees$elev)
+drange = range(trees$disturb)
+new_obs = data.frame(elev = xrange, tci = xrange, streamdist = xrange, disturb = drange, beers = xrange)
+str(new_obs)
+acer_predict <- predict(acer_mod_lm, newdata = new_obs, interval = 'confidence')
+
+abies_predict <- predict(abies_mod_lm, newdata = new_obs, interval = 'confidence')
+
+acer_predict
+abies_predict
+
+```
+
+For each species address the following additional questions:
+
+* how well does the exploratory model appear to explain cover?
+
+Acer: The exploratory model's adjusted r-squared value is 0.17, indicating that 17% of the variability observed in cover is explained by the model.
+Abies: The exploratory model's adjusted r-squared value is 0.24, indicating that 24% of the variability observed in cover is explained by the model.
+
+* which explanatory variables are the most important?
+
+Acer: Elevation, TCI (water potential), disturbance and beers all generated statistically significant results. Based on the summary function, elevation had the largest relative effect size (t value = -10.304), and based on the Anova elevation had a large f-value (106.16), so we would argue that makes it the most important variable. 
+
+Abies: Elevation, stream distance and disturbance all generated statistically significant results. Based on the summary, function, elevation had the largest relative effect size (t-value = 10.764), and based on the Anova elevation had a large f-value (115.87), so we would again argue that makes it the most important variable. 
+
+
+* do model diagnostics indicate any problems with violations of OLS assumptions?
+  
+Acer: Using plot(acer_mod_lm), the residuals vs. fitted and the Scale-Location graphs show some strange geometric patterns, which indicates issues with homoscedasticity, likely rooted in the rounding of cover to whole numbers. The Q-Q plot shows that the points are pretty much normally distributed, except for a few points that I don't think warrant concern. The Residuals vs Leverage graph indicates that are large outliers that are having a disproportionate effect on the regression (at least points 318 and 121).
+
+Abies: Using plot(abies_mod_lm), the residuals vs. fitted and Scale-Location graphs indicate issues with homoscedasticity. The Q-Q plot shows that errors are not normally distributed and the Residuals vs Leverage graph indicates that are large outliers that are having a disproportionate effect on the regression. However, the data could be cleaned up by further subsetting the Abies data to exclude data points where cover = 0. 
+
+```{r}
+##notes for violations of OLS assumptions
+
+#how to interpret homoscedasticity from left two graphs??: looking for evenly scattered points, hopefully no spikes (outliers) #there are/are not large outliers that are having a disproportionate effect on the regression.
+
+#residuals/error are normally distributed (q-q) plot
+
+#residuals vs leverage plot: related to homoscedasticity, looking for points to be evenly scattered/no outliers
+
+
+```
+
+
+* are you able to explain variance in one species better than another, 
+  why might this be the case?
+
+For Abies, 24% of the variability observed in the target variable (cover) was explained (adjusted r^2 = 0.2406) while in Acer 17% of the variability observed in the target variable was explained by the model (adjusted r^2 = 0.1726). This might be the case because Acer is a habitat generalist that exists in numerous quantities at lower and mid elevations, while Abies tends to reside at higher elevations.
+
 
 2\. You may have noticed that the variable cover is defined as positive integers
 between 1 and 10. and is therefore better treated as a discrete rather than
@@ -101,30 +175,92 @@ the perspective of a General Linear Model (GLM) with a Poisson error term
 integers 0 to positive infinity so this may provide a good first approximation.
 Your new model calls will look as follows:
 
-```r
-acer_poi = glm(cover ~ tci + elev + ... , data = my_data, 
-           family='poisson')
+```{r}
+#GLM 
+
+#modeling for acer, looking at all variables 
+acer_mod_poi <- glm(cover ~ ., data=acer, family='poisson')
+Anova(acer_mod_poi, type=3) 
+summary(acer_mod_poi)
+
+
+#modeling for abies, looking at all variables 
+abies_mod_poi <- glm(cover~ ., data=abies, family='poisson')
+Anova(abies_mod_poi, type=3) 
+summary(abies_mod_poi)
+
+
+#check normality, still need to do this??
+par(mfrow = c(2, 2))
+plot(acer_mod_poi) #check for normality
+plot(abies_mod_poi) #check for normality
+
+#assessing degree of variation explained: pseudo r^2
+  #pseudo r^2: a measure of improvement over the null model in terms of LL and thus give an indication of goodness of fit
+
+acer_poi_pseudo_r2 <- (1 - acer_mod_poi$deviance/acer_mod_poi$null.deviance)
+print(acer_poi_pseudo_r2)
+
+abies_poi_pseudo_r2 <- (1 - abies_mod_poi$deviance/abies_mod_poi$null.deviance)
+print(abies_poi_pseudo_r2)
+
 ```
+* how well does the exploratory model appear to explain cover?
 
-For assessing the degree of variation explained you can use a 
-pseudo-R-squared statistic (note this is just one of many possible)
+Acer:The exploratory model's pseudo r-squared value is 0.13, indicating that 13% of the variability observed in cover is explained by the model.
+Abies: The exploratory model's pseudo r-squared value is 0.90, indicating that 90% of the variability observed in cover is explained by the model.
 
-```r
-pseudo_r2 = function(glm_mod) {
-                1 -  glm_mod$deviance / glm_mod$null.deviance
-            }
-```
 
-Compare your qualitative assessment of which variables were most important in each model. 
-Does it appear that changing the error distribution changed the results much? In what ways? 
+* which explanatory variables are the most important?
+
+Acer: Similar to the LM, Elevation, TCI (water potential), disturbance and beers all generated statistically significant results. 
+
+Abies: Similar to the LM, elevation, stream distance and disturbance all generated statistically significant results. The GLM also calculated a statistically significant result for TCI. 
+
+* do model diagnostics indicate any problems with violations of OLS assumptions?
+
+Acer: Similar to the LM, the residuals vs. fitted and the Scale-Location graphs show some strange geometric patterns, which indicates issues with homoscedasticity. The Q-Q plot shows that the points are pretty much normally distributed, except for the same few points as in the lm model.The Residuals vs Leverage graph indicates that there are large outliers that are having a disproportionate effect on the regression (points 318, 7, and 187).
+
+Abies: The residuals vs. fitted and scale-location graphs have spikes of points towards the right hand side of the graphs, indicating issues with homoscedasticity. However, I would say that the graphs look less extreme in the GLM than the LM. The Q-Q plot shows some issues with normality. The Residuals vs Leverage graph shows some large outliers that are strongly effecting the regression, but points look more evenly distributed in the GLM than the LM. 
+
+* are you able to explain variance in one species better than another, 
+  why might this be the case? 
+
+For Acer, the pseudo r^2 is 0.13 (which is similar to the LM) and the pseudo r^2 for Abies is 0.90 (much different from the LM). Variance is better explained for Abies than Acer using a GLM because the pseudo r^2 is 9.0, indicating a high goodness of fit for the GLM Aibes model (pseudo r^2 ranges from 0-1). This might be the case because Abies has many 0 cover sites, which the LM (Gaussian error) predicts as negative cover in which the GLM (Poisson error) does not. 
+
+*Compare your qualitative assessment of which variables were most important in each model. Does it appear that changing the error distribution changed the results much? In what ways? 
+
+The results for Acer did not change, LM, Elevation, TCI (water potential), disturbance and beers all generated significant results (p < 0.05) for both the LM and the GLM. For Abies, the results changed slightly. The LM and GLM reported significance for elevation, stream distance and disturbance. The GLM also reported significance for TCI while the LM did not.
 
 3\. Provide a plain English summary (i.e., no statistics) of what you have
 found and what conclusions we can take away from your analysis?
+
+Cover of both Abies and Acer is best explained as a function of elevation. This makes biological sense because Acer is a habitat generalist that is happy growing in ranges from sea level to 3,000 feet (https://www.srs.fs.usda.gov/pubs/misc/ag_654/volume_2/acer/rubrum.htm) while Abies is typically found at higher elevations ranging from 4,500-6,600 feet (https://www.fs.usda.gov/database/feis/plants/tree/abifra/all.html). 
+
+The visual representation of the data showed that there are issues with the assumption of equal or similar variances in between groups. Further, the outliers in the data represents the biological pattern of the over representation of abies above 3,000 feet. The analyses showed that elevation, water potential, disturbance and heat load index have a significant effect on both abies and acer forest cover.
+
 
 4\. (optional) Examine the behavior of the function `stepAIC()` using the 
 exploratory models developed above. This is a very simple and not very
 robust machine learning stepwise algorithm that uses AIC to select a 
 best model. By default it does a backward selection routine. 
+
+
+```{r}
+#install.packages("MASS")
+library(MASS)
+
+stepAIC(acer_mod_lm)
+#AIC is 1353
+stepAIC(acer_mod_poi)
+#AIC is 3651, therefore lm model is a better fit than poisson.
+
+stepAIC(abies_mod_lm)
+#AIC is 114
+stepAIC(abies_mod_poi)
+#AIC is 202, therefore the lm model is a better fit than poisson.
+```
+
 
 5\. (optional) Develop a model for the number of species in each site 
 (i.e., unique plotID). This variable will also be discrete so the Poisson
