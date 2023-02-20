@@ -56,7 +56,8 @@ Goal of creating plot:
 To observe similarities and differences in moisture requirements for dune species in a two dimensional space. 
 
 Findings with respect to dune vegetation: 
-There are two distinct clusters of points, indicating that there are two distinct groups of vegetation that have similar moisture requirements. 
+There are two distinct clusters of points, indicating that there are two distinct groups of vegetation that have similar moisture requirements with a healthy spectrum of species between them. It appears as though airaprae, empenigr, and hyporadi are outliers and the
+model might be improved by throwing out those data points.
 
 2. Carry out a direct ordination using CCA in order to test any potential 
 hypotheses that you developed after examining the MDS plot. Specifically,
@@ -146,4 +147,4 @@ text(cca_dune_manure, display='bp', col='red')
 these two analyses seem to be suggesting different take home messages? Which
 analysis do you find to be more useful?
 
-The two analyses agree with one another. It would appear as though both analyses agree that there are distinct groups of vegetation that cluster around certain moisture levels. However, CCA makes it more apparent that there are other variables that when combined with moisture are significant, such as Management. I find CCA to be more useful because of this as well as the length of the arrows, which denote the strength of the correlation. Additionally, the direction of the arrows indicates positive or negative correlations between points. Based on this analysis, it seems that many dune species are tolerant of different levels of moisture, thereby maintaining their specific niche within the ecosystem. 
+The two analyses agree with one another. It would appear as though both analyses agree that there are distinct groups of vegetation that cluster around certain moisture levels. However, CCA makes it more apparent that there are other variables that are significant, such as A1 (p=0.027), Management (p < 0.001) and Manure (p=0.027); but not Use (p=0.27) . I find CCA to be more useful because of this as well as the length of the arrows, which denote the strength of the correlation. Additionally, the direction of the arrows indicates positive or negative correlations between points. Based on this analysis, it seems that many dune species are tolerant of different levels of moisture, thereby maintaining their specific niche within the ecosystem. 
