@@ -1,0 +1,149 @@
+
+---
+title: "Multivariate Models HW Assignment"
+author: "Hannah Houston and Ansley Williamson"
+date: "19 Feb 2023"
+output: html_document
+---
+
+For this assignment will be analyzing data on the Vegetation
+and Environment in Dutch Dune Meadows.
+
+To import the data and read the metadata run the following:
+
+```{r}
+library(vegan)
+data(dune)
+data(dune.env)
+?dune
+```
+
+1. Conduct an indirect ordination on the dune plant community. Specifically,
+visually examine a NMDS plot using the bray-curtis distance metric. Below is 
+some code to help you develop a potential plot that emphasizes the role of the
+environmental variable "Moisture". Describe how you interpret the
+graphic. What is the goal of creating such a plot? Does this analysis suggest
+any interesting findings with respect to the dune vegetation?
+
+```{r}
+#make the nmds model 
+#remember: 
+  #NMDS Maximizes rank-order correlation between distance measures and distance in ordination        #space. Points are moved to minimize “stress”. Stress is a measure of the mismatch between the     #two kinds of distance indirect, so only a single matrix is analyzed
+  #bray-curtis is default distance metric
+dune_mds <- metaMDS(dune, distance = "bray")
+
+
+#just for fun
+stressplot(dune_mds) #shows goodness of fit of the model, close to the line = low stress value
+```
+
+
+    ```{r}
+
+    plot(dune_mds, type='n')
+    text(dune_mds, 'sp', cex=.5)
+    # generate vector of colors 
+    color_vect = rev(terrain.colors(6))[-1]
+    points(dune_mds, 'sites', pch=19, 
+           col=color_vect[dune.env$Moisture])
+    legend('topright', paste("Moisture =", 1:5, sep=''), 
+           col=color_vect, pch=19)
+    ```
+How to interpret the graphic: 
+The axes on this plot are meaningless. The distance between points represents the similarity or dissimilarity between points (plant species) for the metric observed (moisture). Points that are closer together have similar moisture requirements than points far from each other.
+
+Goal of creating plot: 
+To observe similarities and differences in moisture requirements for dune species in a two dimensional space. 
+
+Findings with respect to dune vegetation: 
+There are two distinct clusters of points, indicating that there are two distinct groups of vegetation that have similar moisture requirements. 
+
+2. Carry out a direct ordination using CCA in order to test any potential 
+hypotheses that you developed after examining the MDS plot. Specifically,
+carry out a test of the entire model (i.e., including all constrained axes)
+and also carry out tests at the scale of individual explanatory variables
+you included in your model if you included more than one variable. Plot your 
+results.
+
+```{r}
+#test of entire model
+  #remember: variables are A1 (measure of soil thickness), moisture, management, use, and manure
+cca_dune <- cca(dune ~ ., data=dune.env)
+RsquareAdj(cca_dune, 100)
+anova(cca_dune, permutations = 999)
+anova(cca_dune, by='margin', permutations = 999)
+
+
+plot(cca_dune, type='n', scaling=1)
+orditorp(cca_dune, display='sp', cex=0.5, scaling=1, col='blue')
+text(cca_dune, display='bp', col='red')
+
+```
+```{r}
+#test of individual explanatory variables: A1 
+cca_dune_A1 <- cca(dune ~ A1, data=dune.env)
+RsquareAdj(cca_dune_A1, 100)
+anova(cca_dune_A1, permutations = 999)
+anova(cca_dune_A1, by='margin', permutations = 999)
+
+
+plot(cca_dune_A1, type='n', scaling=1)
+orditorp(cca_dune_A1, display='sp', cex=0.5, scaling=1, col='blue')
+text(cca_dune_A1, display='bp', col='red')
+```
+```{r}
+#test of individual explanatory variables: Moisture
+cca_dune_moist <- cca(dune ~ Moisture, data=dune.env)
+RsquareAdj(cca_dune_moist, 100)
+anova(cca_dune_moist, permutations = 999)
+anova(cca_dune_moist, by='margin', permutations = 999)
+
+
+plot(cca_dune_moist, type='n', scaling=1)
+orditorp(cca_dune_moist, display='sp', cex=0.5, scaling=1, col='blue')
+text(cca_dune_moist, display='bp', col='red')
+```
+
+```{r}
+#test of individual explanatory variables: Management
+cca_dune_mgmt <- cca(dune ~ Management, data=dune.env)
+RsquareAdj(cca_dune_mgmt, 100)
+anova(cca_dune_mgmt, permutations = 999)
+anova(cca_dune_mgmt, by='margin', permutations = 999)
+
+
+plot(cca_dune_mgmt, type='n', scaling=1)
+orditorp(cca_dune_mgmt, display='sp', cex=0.5, scaling=1, col='blue')
+text(cca_dune_mgmt, display='bp', col='red')
+```
+```{r}
+#test of individual explanatory variables: Use
+cca_dune_use <- cca(dune ~ Use, data=dune.env)
+RsquareAdj(cca_dune_use, 100)
+anova(cca_dune_use, permutations = 999)
+anova(cca_dune_use, by='margin', permutations = 999)
+
+
+plot(cca_dune_use, type='n', scaling=1)
+orditorp(cca_dune_use, display='sp', cex=0.5, scaling=1, col='blue')
+text(cca_dune_use, display='bp', col='red')
+```
+```{r}
+#test of individual explanatory variables: Manure
+cca_dune_manure <- cca(dune ~ Manure, data=dune.env)
+RsquareAdj(cca_dune_manure, 100)
+anova(cca_dune_manure, permutations = 999)
+anova(cca_dune_manure, by='margin', permutations = 999)
+
+
+plot(cca_dune_manure, type='n', scaling=1)
+orditorp(cca_dune_manure, display='sp', cex=0.5, scaling=1, col='blue')
+text(cca_dune_manure, display='bp', col='red')
+```
+
+
+3. Do your two analyses agree with one another or complement one another or do
+these two analyses seem to be suggesting different take home messages? Which
+analysis do you find to be more useful?
+
+The two analyses agree with one another. It would appear as though both analyses agree that there are distinct groups of vegetation that cluster around certain moisture levels. However, CCA makes it more apparent that there are other variables that when combined with moisture are significant, such as Management. I find CCA to be more useful because of this as well as the length of the arrows, which denote the strength of the correlation. Additionally, the direction of the arrows indicates positive or negative correlations between points. Based on this analysis, it seems that many dune species are tolerant of different levels of moisture, thereby maintaining their specific niche within the ecosystem. 
